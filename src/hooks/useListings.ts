@@ -1,22 +1,27 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { CarListing } from '@/types';
-import { getListings, addListing } from '@/lib/storage';
+import { getListings, saveListings } from '@/lib/storage';
 
 export function useListings() {
-  const [listings, setListings] = useState<CarListing[]>([]);
+  const [listings, setListings] = useState<CarListing[]>(() => getListings());
 
   useEffect(() => {
-    setListings(getListings());
-  }, []);
+    saveListings(listings);
+  }, [listings]);
 
-  const refresh = useCallback(() => {
-    setListings(getListings());
-  }, []);
+  const addListing = (data: Omit<CarListing, 'id' | 'createdAt' | 'sellerId' | 'sellerName' | 'images' | 'features'>) => {
+    const newListing: CarListing = {
+      ...data,
+      id: `listing-${Date.now()}`,
+      createdAt: new Date().toISOString(),
+      sellerId: 'user-local',
+      sellerName: 'Local User',
+      images: [],
+      features: [],
+    };
+    setListings(prev => [newListing, ...prev]);
+    return newListing;
+  };
 
-  const add = useCallback((listing: CarListing) => {
-    addListing(listing);
-    setListings(getListings());
-  }, []);
-
-  return { listings, refresh, add };
+  return { listings, addListing };
 }

@@ -1,394 +1,321 @@
-import { CarListing, AuctionListing, User, Bid } from '@/types';
+import { CarListing, AuctionListing, User } from '@/types';
 
 const KEYS = {
-  LISTINGS: 'vccp_listings',
-  AUCTIONS: 'vccp_auctions',
-  USERS: 'vccp_users',
-  CURRENT_USER: 'vccp_current_user',
+  listings: 'vccp_listings',
+  auctions: 'vccp_auctions',
+  users: 'vccp_users',
+  currentUser: 'vccp_current_user',
 };
 
-export function getListings(): CarListing[] {
+function readJSON<T>(key: string, fallback: T): T {
   try {
-    const data = localStorage.getItem(KEYS.LISTINGS);
-    return data ? JSON.parse(data) : getSampleListings();
+    const raw = localStorage.getItem(key);
+    if (!raw) return fallback;
+    return JSON.parse(raw) as T;
   } catch {
-    return getSampleListings();
+    return fallback;
   }
+}
+
+function writeJSON<T>(key: string, value: T): void {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // storage quota exceeded or unavailable
+  }
+}
+
+// ── Listings ──────────────────────────────────────────────────────────────────
+
+const SEED_LISTINGS: CarListing[] = [
+  {
+    id: 'listing-1',
+    title: '1967 Ford Mustang Fastback',
+    make: 'Ford',
+    model: 'Mustang',
+    year: 1967,
+    price: 58000,
+    mileage: 72400,
+    condition: 'excellent',
+    transmission: 'manual',
+    fuelType: 'gasoline',
+    bodyStyle: 'coupe',
+    drivetrain: 'rwd',
+    color: 'Candy Apple Red',
+    location: 'Austin, TX',
+    description: 'Numbers-matching 390 FE V8 with 4-speed Toploader. Restored to factory spec with modern disc brake upgrade. Documented history.',
+    images: [],
+    features: ['Power steering', 'Pony interior', 'Fold-down rear seat', 'Rally-Pac gauge cluster'],
+    sellerId: 'user-seed',
+    sellerName: 'Classic Auto Broker',
+    createdAt: new Date(Date.now() - 3 * 86400000).toISOString(),
+  },
+  {
+    id: 'listing-2',
+    title: '1969 Chevrolet Camaro Z/28',
+    make: 'Chevrolet',
+    model: 'Camaro',
+    year: 1969,
+    price: 89000,
+    mileage: 44200,
+    condition: 'excellent',
+    transmission: 'manual',
+    fuelType: 'gasoline',
+    bodyStyle: 'coupe',
+    drivetrain: 'rwd',
+    color: 'Hugger Orange',
+    location: 'Nashville, TN',
+    description: 'Rare Z/28 with DZ 302 V8. Frame-off restoration completed 2021. NCRS documented. Correct Muncie 4-speed.',
+    images: [],
+    features: ['DZ 302 V8', 'Muncie 4-speed', 'Front disc brakes', 'Special instrumentation'],
+    sellerId: 'user-seed',
+    sellerName: 'Southern Classics',
+    createdAt: new Date(Date.now() - 5 * 86400000).toISOString(),
+  },
+  {
+    id: 'listing-3',
+    title: '1957 Chevrolet Bel Air',
+    make: 'Chevrolet',
+    model: 'Bel Air',
+    year: 1957,
+    price: 72000,
+    mileage: 58900,
+    condition: 'good',
+    transmission: 'automatic',
+    fuelType: 'gasoline',
+    bodyStyle: 'sedan',
+    drivetrain: 'rwd',
+    color: 'Cascade Green / India Ivory',
+    location: 'Scottsdale, AZ',
+    description: 'Two-tone beauty with 283 V8 and Powerglide. New chrome throughout. Interior professionally re-done in period-correct vinyl.',
+    images: [],
+    features: ['283 V8', 'Powerglide auto', 'Full chrome restoration', 'Power windows'],
+    sellerId: 'user-seed',
+    sellerName: 'Desert Classic Cars',
+    createdAt: new Date(Date.now() - 7 * 86400000).toISOString(),
+  },
+  {
+    id: 'listing-4',
+    title: '1970 Dodge Challenger R/T',
+    make: 'Dodge',
+    model: 'Challenger',
+    year: 1970,
+    price: 115000,
+    mileage: 31800,
+    condition: 'excellent',
+    transmission: 'manual',
+    fuelType: 'gasoline',
+    bodyStyle: 'coupe',
+    drivetrain: 'rwd',
+    color: 'Plum Crazy Purple',
+    location: 'Detroit, MI',
+    description: 'Matching numbers 440 Six Pack with Pistol Grip 4-speed. One of 1,640 produced in this color. Broadcast sheet present.',
+    images: [],
+    features: ['440 Six Pack', 'Pistol Grip 4-speed', 'Shaker hood', 'Dana 60 rear axle'],
+    sellerId: 'user-seed',
+    sellerName: 'Mopar Mike Motors',
+    createdAt: new Date(Date.now() - 2 * 86400000).toISOString(),
+  },
+  {
+    id: 'listing-5',
+    title: '1965 Jaguar E-Type Series 1',
+    make: 'Jaguar',
+    model: 'E-Type',
+    year: 1965,
+    price: 145000,
+    mileage: 48300,
+    condition: 'excellent',
+    transmission: 'manual',
+    fuelType: 'gasoline',
+    bodyStyle: 'roadster',
+    drivetrain: 'rwd',
+    color: 'Opalescent Silver Blue',
+    location: 'San Francisco, CA',
+    description: 'Matching numbers 4.2 litre inline-6. UK-delivered car imported 1967. Recent full mechanical restoration by Jaguar specialist.',
+    images: [],
+    features: ['4.2 litre inline-6', 'Close-ratio 4-speed', 'Disc brakes all round', 'Wire wheels'],
+    sellerId: 'user-seed',
+    sellerName: 'British Iron Imports',
+    createdAt: new Date(Date.now() - 10 * 86400000).toISOString(),
+  },
+  {
+    id: 'listing-6',
+    title: '1969 Plymouth Road Runner',
+    make: 'Plymouth',
+    model: 'Road Runner',
+    year: 1969,
+    price: 67500,
+    mileage: 62100,
+    condition: 'good',
+    transmission: 'automatic',
+    fuelType: 'gasoline',
+    bodyStyle: 'coupe',
+    drivetrain: 'rwd',
+    color: 'B5 Blue',
+    location: 'Charlotte, NC',
+    description: '383 Magnum V8 with TorqueFlite automatic. Correct Beep-Beeep horn. Numbers matching with build sheet. Recent full paint correction.',
+    images: [],
+    features: ['383 Magnum V8', 'TorqueFlite auto', 'Dana 60 Sure-Grip', 'Rallye instrument cluster'],
+    sellerId: 'user-seed',
+    sellerName: 'Carolina Muscle Cars',
+    createdAt: new Date(Date.now() - 6 * 86400000).toISOString(),
+  },
+];
+
+export function getListings(): CarListing[] {
+  const stored = readJSON<CarListing[]>(KEYS.listings, []);
+  if (stored.length === 0) {
+    writeJSON(KEYS.listings, SEED_LISTINGS);
+    return SEED_LISTINGS;
+  }
+  return stored;
 }
 
 export function saveListings(listings: CarListing[]): void {
-  localStorage.setItem(KEYS.LISTINGS, JSON.stringify(listings));
+  writeJSON(KEYS.listings, listings);
 }
 
-export function addListing(listing: CarListing): void {
-  const listings = getListings();
-  listings.unshift(listing);
-  saveListings(listings);
-}
+// ── Auctions ──────────────────────────────────────────────────────────────────
 
-export function getListingById(id: string): CarListing | null {
-  const listings = getListings();
-  return listings.find(l => l.id === id) || null;
-}
-
-export function getAuctions(): AuctionListing[] {
-  try {
-    const data = localStorage.getItem(KEYS.AUCTIONS);
-    const auctions: AuctionListing[] = data ? JSON.parse(data) : getSampleAuctions();
-    return auctions.map(a => ({
-      ...a,
-      status: computeAuctionStatus(a),
-    }));
-  } catch {
-    return getSampleAuctions();
-  }
-}
-
-function computeAuctionStatus(auction: AuctionListing): AuctionListing['status'] {
-  const now = Date.now();
-  const start = new Date(auction.startTime).getTime();
-  const end = new Date(auction.endTime).getTime();
-  if (now < start) return 'upcoming';
-  if (now >= start && now < end) return 'active';
-  if (now >= end) {
-    if (auction.currentBid >= auction.reservePrice && auction.bids.length > 0) return 'sold';
-    if (auction.bids.length > 0 && auction.currentBid < auction.reservePrice) return 'reserve-not-met';
-    return 'ended';
-  }
-  return auction.status;
-}
-
-export function saveAuctions(auctions: AuctionListing[]): void {
-  localStorage.setItem(KEYS.AUCTIONS, JSON.stringify(auctions));
-}
-
-export function addAuction(auction: AuctionListing): void {
-  const auctions = getAuctions();
-  auctions.unshift(auction);
-  saveAuctions(auctions);
-}
-
-export function getAuctionById(id: string): AuctionListing | null {
-  const auctions = getAuctions();
-  return auctions.find(a => a.id === id) || null;
-}
-
-export function updateAuction(updated: AuctionListing): void {
-  const auctions = getAuctions();
-  const idx = auctions.findIndex(a => a.id === updated.id);
-  if (idx !== -1) {
-    auctions[idx] = { ...updated, status: computeAuctionStatus(updated) };
-    saveAuctions(auctions);
-  }
-}
-
-export function placeBid(auctionId: string, bid: Bid): AuctionListing | null {
-  const auctions = getAuctions();
-  const idx = auctions.findIndex(a => a.id === auctionId);
-  if (idx === -1) return null;
-  const auction = auctions[idx];
-  if (bid.amount <= auction.currentBid) return null;
-  auction.currentBid = bid.amount;
-  auction.highestBidderId = bid.bidderId;
-  auction.highestBidderName = bid.bidderName;
-  auction.bids = [bid, ...auction.bids];
-  auctions[idx] = auction;
-  saveAuctions(auctions);
-  return auction;
-}
-
-export function getUsers(): User[] {
-  try {
-    const data = localStorage.getItem(KEYS.USERS);
-    return data ? JSON.parse(data) : [];
-  } catch {
-    return [];
-  }
-}
-
-export function saveUsers(users: User[]): void {
-  localStorage.setItem(KEYS.USERS, JSON.stringify(users));
-}
-
-export function registerUser(user: User, password: string): boolean {
-  const users = getUsers();
-  const existing = users.find(u => u.email === user.email);
-  if (existing) return false;
-  users.push(user);
-  saveUsers(users);
-  const creds = getCredentials();
-  creds[user.email] = password;
-  saveCredentials(creds);
-  return true;
-}
-
-function getCredentials(): Record<string, string> {
-  try {
-    const data = localStorage.getItem('vccp_creds');
-    return data ? JSON.parse(data) : {};
-  } catch {
-    return {};
-  }
-}
-
-function saveCredentials(creds: Record<string, string>): void {
-  localStorage.setItem('vccp_creds', JSON.stringify(creds));
-}
-
-export function loginUser(email: string, password: string): User | null {
-  const creds = getCredentials();
-  if (creds[email] !== password) return null;
-  const users = getUsers();
-  return users.find(u => u.email === email) || null;
-}
-
-export function getCurrentUser(): User | null {
-  try {
-    const data = localStorage.getItem(KEYS.CURRENT_USER);
-    return data ? JSON.parse(data) : null;
-  } catch {
-    return null;
-  }
-}
-
-export function setCurrentUser(user: User | null): void {
-  if (user) {
-    localStorage.setItem(KEYS.CURRENT_USER, JSON.stringify(user));
-  } else {
-    localStorage.removeItem(KEYS.CURRENT_USER);
-  }
-}
-
-export function generateId(): string {
-  return Date.now().toString(36) + Math.random().toString(36).substr(2);
-}
-
-function getSampleListings(): CarListing[] {
-  const listings: CarListing[] = [
-    {
-      id: 'sample1',
+const SEED_AUCTIONS: AuctionListing[] = [
+  {
+    id: 'auction-1',
+    car: {
+      id: 'listing-1',
       title: '1967 Ford Mustang Fastback',
       make: 'Ford',
       model: 'Mustang',
       year: 1967,
-      price: 65000,
-      mileage: 82000,
-      fuelType: 'gasoline',
-      transmission: 'manual',
+      price: 58000,
+      mileage: 72400,
       condition: 'excellent',
+      transmission: 'manual',
+      fuelType: 'gasoline',
       bodyStyle: 'coupe',
       drivetrain: 'rwd',
-      exteriorColor: 'Highland Green',
-      interiorColor: 'Black',
-      engineSize: '390 V8',
-      horsepower: 325,
-      vin: '7R02S123456',
-      description: 'Iconic 1967 Ford Mustang Fastback in stunning Highland Green. Numbers matching 390 V8 engine with 4-speed manual transmission. Full frame-off restoration completed in 2021.',
-      features: ['Air Conditioning', 'Power Steering', 'Rally Pac Gauge Package', 'Pony Interior', 'Fold-Down Rear Seat'],
+      color: 'Candy Apple Red',
+      location: 'Austin, TX',
+      description: 'Numbers-matching 390 FE V8.',
       images: [],
-      location: 'Los Angeles, CA',
-      sellerName: 'James Whitfield',
-      sellerPhone: '(555) 234-5678',
-      sellerEmail: 'james@vccp.com',
-      createdAt: new Date(Date.now() - 86400000 * 5).toISOString(),
-      isAuction: false,
+      features: [],
+      sellerId: 'user-seed',
+      sellerName: 'Classic Auto Broker',
+      createdAt: new Date(Date.now() - 3 * 86400000).toISOString(),
     },
-    {
-      id: 'sample2',
-      title: '1969 Chevrolet Camaro Z/28',
-      make: 'Chevrolet',
-      model: 'Camaro',
-      year: 1969,
-      price: 89500,
-      mileage: 55000,
-      fuelType: 'gasoline',
-      transmission: 'manual',
-      condition: 'excellent',
-      bodyStyle: 'coupe',
-      drivetrain: 'rwd',
-      exteriorColor: 'Fathom Green',
-      interiorColor: 'Black',
-      engineSize: '302 V8',
-      horsepower: 290,
-      vin: '124379N123456',
-      description: 'Rare 1969 Chevrolet Camaro Z/28 in desirable Fathom Green. Original DZ 302 engine, Muncie 4-speed. Documented with Protect-O-Plate and original window sticker.',
-      features: ['Front Disc Brakes', 'Rally Wheels', 'Sports Car Suspension', 'Rear Spoiler', 'Houndstooth Interior'],
-      images: [],
-      location: 'Chicago, IL',
-      sellerName: 'Robert Donovan',
-      sellerPhone: '(555) 345-6789',
-      sellerEmail: 'robert@vccp.com',
-      createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
-      isAuction: false,
-    },
-    {
-      id: 'sample3',
-      title: '1957 Chevrolet Bel Air',
-      make: 'Chevrolet',
-      model: 'Bel Air',
-      year: 1957,
-      price: 72000,
-      mileage: 64000,
-      fuelType: 'gasoline',
-      transmission: 'automatic',
-      condition: 'excellent',
-      bodyStyle: 'sedan',
-      drivetrain: 'rwd',
-      exteriorColor: 'Onyx Black / India Ivory',
-      interiorColor: 'Red and White',
-      engineSize: '283 V8',
-      horsepower: 220,
-      vin: 'VC57B123456',
-      description: 'Pristine 1957 Chevrolet Bel Air two-tone in classic black and ivory. Fuel-injected 283 V8 with Powerglide automatic. Absolutely stunning show quality restoration.',
-      features: ['Fuel Injection', 'Continental Kit', 'Fender Skirts', 'Signal Seeking Radio', 'Power Windows', 'Air Conditioning'],
-      images: [],
-      location: 'Nashville, TN',
-      sellerName: 'Mary Grace Thompson',
-      sellerPhone: '(555) 456-7890',
-      sellerEmail: 'mary@vccp.com',
-      createdAt: new Date(Date.now() - 86400000 * 7).toISOString(),
-      isAuction: false,
-    },
-    {
-      id: 'sample4',
+    startingBid: 35000,
+    currentBid: 47500,
+    reservePrice: 55000,
+    startTime: new Date(Date.now() - 86400000).toISOString(),
+    endTime: new Date(Date.now() + 6 * 3600000).toISOString(),
+    status: 'active',
+    bids: [
+      { id: 'bid-1', auctionId: 'auction-1', bidderId: 'user-a', bidderName: 'James H.', amount: 40000, createdAt: new Date(Date.now() - 3600000).toISOString() },
+      { id: 'bid-2', auctionId: 'auction-1', bidderId: 'user-b', bidderName: 'Maria C.', amount: 45000, createdAt: new Date(Date.now() - 1800000).toISOString() },
+      { id: 'bid-3', auctionId: 'auction-1', bidderId: 'user-a', bidderName: 'James H.', amount: 47500, createdAt: new Date(Date.now() - 600000).toISOString() },
+    ],
+  },
+  {
+    id: 'auction-2',
+    car: {
+      id: 'listing-4',
       title: '1970 Dodge Challenger R/T',
       make: 'Dodge',
       model: 'Challenger',
       year: 1970,
-      price: 125000,
-      mileage: 42000,
-      fuelType: 'gasoline',
-      transmission: 'manual',
+      price: 115000,
+      mileage: 31800,
       condition: 'excellent',
+      transmission: 'manual',
+      fuelType: 'gasoline',
       bodyStyle: 'coupe',
       drivetrain: 'rwd',
-      exteriorColor: 'Plum Crazy Purple',
-      interiorColor: 'Black',
-      engineSize: '440 Six Pack',
-      horsepower: 390,
-      vin: 'JS23U0B123456',
-      description: 'One of the most desirable muscle cars ever built. 1970 Dodge Challenger R/T in iconic Plum Crazy Purple with 440 Six Pack engine. Numbers matching with documented history.',
-      features: ['Six Pack Carburetion', 'Dana 60 Rear Axle', 'Pistol Grip Shifter', 'Elastomeric Bumpers', 'Shaker Hood Scoop'],
-      images: [],
+      color: 'Plum Crazy Purple',
       location: 'Detroit, MI',
-      sellerName: 'Carlos Reyes',
-      sellerPhone: '(555) 567-8901',
-      sellerEmail: 'carlos@vccp.com',
-      createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
-      isAuction: false,
+      description: 'Matching numbers 440 Six Pack.',
+      images: [],
+      features: [],
+      sellerId: 'user-seed',
+      sellerName: 'Mopar Mike Motors',
+      createdAt: new Date(Date.now() - 2 * 86400000).toISOString(),
     },
-    {
-      id: 'sample5',
-      title: '1963 Jaguar E-Type Series 1',
+    startingBid: 75000,
+    currentBid: 92000,
+    startTime: new Date(Date.now() - 2 * 86400000).toISOString(),
+    endTime: new Date(Date.now() + 14 * 3600000).toISOString(),
+    status: 'active',
+    bids: [
+      { id: 'bid-4', auctionId: 'auction-2', bidderId: 'user-c', bidderName: 'Robert P.', amount: 80000, createdAt: new Date(Date.now() - 5 * 3600000).toISOString() },
+      { id: 'bid-5', auctionId: 'auction-2', bidderId: 'user-d', bidderName: 'Susan K.', amount: 92000, createdAt: new Date(Date.now() - 2 * 3600000).toISOString() },
+    ],
+  },
+  {
+    id: 'auction-3',
+    car: {
+      id: 'listing-5',
+      title: '1965 Jaguar E-Type Series 1',
       make: 'Jaguar',
       model: 'E-Type',
-      year: 1963,
-      price: 185000,
-      mileage: 38000,
-      fuelType: 'gasoline',
-      transmission: 'manual',
+      year: 1965,
+      price: 145000,
+      mileage: 48300,
       condition: 'excellent',
+      transmission: 'manual',
+      fuelType: 'gasoline',
       bodyStyle: 'roadster',
       drivetrain: 'rwd',
-      exteriorColor: 'British Racing Green',
-      interiorColor: 'Tan',
-      engineSize: '3.8L Inline 6',
-      horsepower: 265,
-      vin: '878901',
-      description: 'Extraordinarily well-preserved 1963 Jaguar E-Type Series 1 roadster. Called the most beautiful car ever made by Enzo Ferrari himself. Original engine, matching numbers throughout.',
-      features: ['Triple Weber Carburettors', 'Independent Rear Suspension', 'Disc Brakes All Around', 'Chrome Wire Wheels', 'Leather Interior'],
+      color: 'Opalescent Silver Blue',
+      location: 'San Francisco, CA',
+      description: 'Matching numbers 4.2 litre inline-6.',
       images: [],
-      location: 'New York, NY',
-      sellerName: 'William Ashford',
-      sellerPhone: '(555) 678-9012',
-      sellerEmail: 'william@vccp.com',
-      createdAt: new Date(Date.now() - 86400000 * 10).toISOString(),
-      isAuction: false,
+      features: [],
+      sellerId: 'user-seed',
+      sellerName: 'British Iron Imports',
+      createdAt: new Date(Date.now() - 10 * 86400000).toISOString(),
     },
-    {
-      id: 'sample6',
-      title: '1971 Plymouth Hemi Cuda',
-      make: 'Plymouth',
-      model: "Hemi 'Cuda",
-      year: 1971,
-      price: 2200000,
-      mileage: 19000,
-      fuelType: 'gasoline',
-      transmission: 'manual',
-      condition: 'excellent',
-      bodyStyle: 'coupe',
-      drivetrain: 'rwd',
-      exteriorColor: 'Moulin Rouge',
-      interiorColor: 'Black',
-      engineSize: '426 Hemi',
-      horsepower: 425,
-      vin: 'BS23V1B123456',
-      description: "Extremely rare 1971 Plymouth Hemi 'Cuda, one of only 108 built with the 426 Hemi engine. This is considered the holy grail of American muscle cars. Documented, numbers matching.",
-      features: ['426 Hemi Engine', 'Pistol Grip 4-Speed', 'Rallye Instrument Cluster', 'Shaker Hood', 'Elastomeric Front Bumper'],
-      images: [],
-      location: 'Scottsdale, AZ',
-      sellerName: 'VCCP Broker Services',
-      sellerPhone: '(555) 789-0123',
-      sellerEmail: 'broker@vccp.com',
-      createdAt: new Date(Date.now() - 86400000 * 1).toISOString(),
-      isAuction: false,
-    },
-  ];
-  saveListings(listings);
-  return listings;
+    startingBid: 100000,
+    currentBid: 100000,
+    startTime: new Date(Date.now() + 2 * 86400000).toISOString(),
+    endTime: new Date(Date.now() + 4 * 86400000).toISOString(),
+    status: 'upcoming',
+    bids: [],
+  },
+];
+
+export function getAuctions(): AuctionListing[] {
+  const stored = readJSON<AuctionListing[]>(KEYS.auctions, []);
+  if (stored.length === 0) {
+    writeJSON(KEYS.auctions, SEED_AUCTIONS);
+    return SEED_AUCTIONS;
+  }
+  return stored;
 }
 
-function getSampleAuctions(): AuctionListing[] {
-  const listings = getListings();
-  const car1 = listings.find(l => l.id === 'sample1') || listings[0];
-  const car2 = listings.find(l => l.id === 'sample4') || listings[1];
+export function saveAuctions(auctions: AuctionListing[]): void {
+  writeJSON(KEYS.auctions, auctions);
+}
 
-  const now = Date.now();
-  const auctions: AuctionListing[] = [
-    {
-      id: 'auction1',
-      carId: car1.id,
-      car: car1,
-      sellerId: 'seller1',
-      sellerName: car1.sellerName,
-      startingBid: 45000,
-      reservePrice: 60000,
-      currentBid: 52500,
-      highestBidderId: 'bidder1',
-      highestBidderName: 'Anonymous Bidder',
-      bids: [
-        { id: 'bid1', auctionId: 'auction1', bidderId: 'bidder1', bidderName: 'Anonymous Bidder', amount: 52500, timestamp: new Date(now - 3600000).toISOString() },
-        { id: 'bid2', auctionId: 'auction1', bidderId: 'bidder2', bidderName: 'Classic Car Fan', amount: 50000, timestamp: new Date(now - 7200000).toISOString() },
-        { id: 'bid3', auctionId: 'auction1', bidderId: 'bidder1', bidderName: 'Anonymous Bidder', amount: 47000, timestamp: new Date(now - 10800000).toISOString() },
-      ],
-      startTime: new Date(now - 3600000 * 5).toISOString(),
-      endTime: new Date(now + 3600000 * 7).toISOString(),
-      durationHours: 12,
-      status: 'active',
-      createdAt: new Date(now - 3600000 * 6).toISOString(),
-    },
-    {
-      id: 'auction2',
-      carId: car2.id,
-      car: car2,
-      sellerId: 'seller2',
-      sellerName: car2.sellerName,
-      startingBid: 80000,
-      reservePrice: 120000,
-      currentBid: 95000,
-      highestBidderId: 'bidder3',
-      highestBidderName: 'MuscleCar Collector',
-      bids: [
-        { id: 'bid4', auctionId: 'auction2', bidderId: 'bidder3', bidderName: 'MuscleCar Collector', amount: 95000, timestamp: new Date(now - 1800000).toISOString() },
-        { id: 'bid5', auctionId: 'auction2', bidderId: 'bidder4', bidderName: 'Vintage Auto', amount: 90000, timestamp: new Date(now - 3600000).toISOString() },
-      ],
-      startTime: new Date(now - 3600000 * 2).toISOString(),
-      endTime: new Date(now + 3600000 * 22).toISOString(),
-      durationHours: 24,
-      status: 'active',
-      createdAt: new Date(now - 3600000 * 3).toISOString(),
-    },
-  ];
-  saveAuctions(auctions);
-  return auctions;
+// ── Users ─────────────────────────────────────────────────────────────────────
+
+export function getUsers(): User[] {
+  return readJSON<User[]>(KEYS.users, []);
+}
+
+export function saveUsers(users: User[]): void {
+  writeJSON(KEYS.users, users);
+}
+
+export function getCurrentUser(): User | null {
+  return readJSON<User | null>(KEYS.currentUser, null);
+}
+
+export function saveCurrentUser(user: User): void {
+  writeJSON(KEYS.currentUser, user);
+}
+
+export function clearCurrentUser(): void {
+  try {
+    localStorage.removeItem(KEYS.currentUser);
+  } catch {
+    // ignore
+  }
 }

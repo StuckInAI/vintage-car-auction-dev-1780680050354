@@ -1,9 +1,17 @@
+export type CarCondition = 'excellent' | 'good' | 'fair' | 'poor' | 'for-parts';
+export type Transmission = 'manual' | 'automatic' | 'semi-automatic';
 export type FuelType = 'gasoline' | 'diesel' | 'electric' | 'hybrid' | 'other';
-export type TransmissionType = 'automatic' | 'manual' | 'semi-automatic';
-export type ConditionType = 'excellent' | 'good' | 'fair' | 'poor' | 'for-parts';
-export type BodyStyle = 'sedan' | 'coupe' | 'convertible' | 'wagon' | 'suv' | 'truck' | 'van' | 'roadster' | 'other';
-export type DrivetrainType = 'rwd' | 'fwd' | 'awd' | '4wd';
-export type ColorType = string;
+export type BodyStyle = 'sedan' | 'coupe' | 'convertible' | 'wagon' | 'suv' | 'truck' | 'roadster' | 'other';
+export type Drivetrain = 'rwd' | 'fwd' | 'awd' | '4wd';
+export type AuctionStatus = 'active' | 'upcoming' | 'ended' | 'sold' | 'reserve-not-met';
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  password: string;
+  createdAt: string;
+}
 
 export interface CarListing {
   id: string;
@@ -13,43 +21,18 @@ export interface CarListing {
   year: number;
   price: number;
   mileage: number;
+  condition: CarCondition;
+  transmission: Transmission;
   fuelType: FuelType;
-  transmission: TransmissionType;
-  condition: ConditionType;
   bodyStyle: BodyStyle;
-  drivetrain: DrivetrainType;
-  exteriorColor: string;
-  interiorColor: string;
-  engineSize: string;
-  horsepower: number;
-  vin: string;
-  description: string;
-  features: string[];
-  images: string[];
+  drivetrain: Drivetrain;
+  color: string;
   location: string;
-  sellerName: string;
-  sellerPhone: string;
-  sellerEmail: string;
-  createdAt: string;
-  isAuction: boolean;
-}
-
-export interface AuctionListing {
-  id: string;
-  carId: string;
-  car: CarListing;
+  description: string;
+  images: string[];
+  features: string[];
   sellerId: string;
   sellerName: string;
-  startingBid: number;
-  reservePrice: number;
-  currentBid: number;
-  highestBidderId: string;
-  highestBidderName: string;
-  bids: Bid[];
-  startTime: string;
-  endTime: string;
-  durationHours: number;
-  status: 'upcoming' | 'active' | 'ended' | 'sold' | 'reserve-not-met';
   createdAt: string;
 }
 
@@ -59,15 +42,19 @@ export interface Bid {
   bidderId: string;
   bidderName: string;
   amount: number;
-  timestamp: string;
+  createdAt: string;
 }
 
-export interface User {
+export interface AuctionListing {
   id: string;
-  name: string;
-  email: string;
-  role: 'buyer' | 'seller' | 'both';
-  createdAt: string;
+  car: CarListing;
+  startingBid: number;
+  currentBid: number;
+  reservePrice?: number;
+  startTime: string;
+  endTime: string;
+  status: AuctionStatus;
+  bids: Bid[];
 }
 
 export interface FilterState {

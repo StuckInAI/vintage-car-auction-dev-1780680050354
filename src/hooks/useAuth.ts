@@ -1,47 +1,41 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import { User } from '@/types';
-import { getCurrentUser, setCurrentUser, loginUser, registerUser, generateId } from '@/lib/storage';
+import { getUsers, saveUsers, getCurrentUser, saveCurrentUser, clearCurrentUser } from '@/lib/storage';
 
 export function useAuth() {
-  const [currentUser, setCurrentUserState] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState<User | null>(() => getCurrentUser());
 
-  useEffect(() => {
-    const user = getCurrentUser();
-    setCurrentUserState(user);
-    setLoading(false);
-  }, []);
-
-  const login = useCallback((email: string, password: string): boolean => {
-    const user = loginUser(email, password);
+  const login = (email: string, password: string): boolean => {
+    const users = getUsers();
+    const user = users.find(u => u.email === email && u.password === password);
     if (user) {
+      saveCurrentUser(user);
       setCurrentUser(user);
-      setCurrentUserState(user);
       return true;
     }
     return false;
-  }, []);
+  };
 
-  const register = useCallback((name: string, email: string, password: string, role: User['role']): boolean => {
-    const user: User = {
-      id: generateId(),
+  const register = (name: string, email: string, password: string): boolean => {
+    const users = getUsers();
+    if (users.find(u => u.email === email)) return false;
+    const newUser: User = {
+      id: `user-${Date.now()}`,
       name,
       email,
-      role,
+      password,
       createdAt: new Date().toISOString(),
     };
-    const success = registerUser(user, password);
-    if (success) {
-      setCurrentUser(user);
-      setCurrentUserState(user);
-    }
-    return success;
-  }, []);
+    saveUsers([...users, newUser]);
+    saveCurrentUser(newUser);
+    setCurrentUser(newUser);
+    return true;
+  };
 
-  const logout = useCallback(() => {
+  const logout = () => {
+    clearCurrentUser();
     setCurrentUser(null);
-    setCurrentUserState(null);
-  }, []);
+  };
 
-  return { currentUser, loading, login, register, logout };
+  return { currentUser, login, register, logout };
 }
