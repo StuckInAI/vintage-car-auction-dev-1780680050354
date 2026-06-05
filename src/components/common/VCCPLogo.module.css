@@ -1,0 +1,84 @@
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  user-select: none;
+}
+
+.emblem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+  padding: 6px;
+  box-shadow: var(--shadow-gold);
+}
+
+.carSvg {
+  color: var(--color-secondary);
+}
+
+.textBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.brand {
+  font-family: var(--font-family);
+  font-weight: 700;
+  color: var(--color-primary-light);
+  letter-spacing: 3px;
+  line-height: 1;
+}
+
+.subtitle {
+  color: var(--color-text-muted);
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+/* Sizes */
+.small .emblem {
+  padding: 5px;
+}
+.small .carSvg {
+  width: 36px;
+  height: 24px;
+}
+.small .brand {
+  font-size: 18px;
+}
+.small .subtitle {
+  font-size: 9px;
+}
+
+.medium .emblem {
+  padding: 8px;
+}
+.medium .carSvg {
+  width: 60px;
+  height: 40px;
+}
+.medium .brand {
+  font-size: 28px;
+}
+.medium .subtitle {
+  font-size: 11px;
+}
+
+.large .emblem {
+  padding: 12px;
+}
+.large .carSvg {
+  width: 90px;
+  height: 60px;
+}
+.large .brand {
+  font-size: 48px;
+}
+.large .subtitle {
+  font-size: 14px;
+}

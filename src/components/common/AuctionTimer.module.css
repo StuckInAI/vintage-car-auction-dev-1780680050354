@@ -1,0 +1,60 @@
+.compact {
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  color: #ff6b78;
+  letter-spacing: 1px;
+}
+
+.ended {
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.timer {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.timerLarge .timeValue {
+  font-size: 48px;
+}
+
+.timerLarge .timeLabel {
+  font-size: 13px;
+}
+
+.timeUnit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: var(--color-secondary);
+  border: 1px solid rgba(230,57,70,0.4);
+  border-radius: var(--radius-md);
+  padding: 10px 16px;
+  min-width: 70px;
+}
+
+.timeValue {
+  font-family: 'Courier New', monospace;
+  font-size: 32px;
+  font-weight: 800;
+  color: #ff6b78;
+  line-height: 1;
+}
+
+.timeLabel {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  letter-spacing: 2px;
+}
+
+.colon {
+  font-size: 28px;
+  font-weight: 700;
+  color: rgba(230,57,70,0.6);
+  margin-bottom: 14px;
+  font-family: 'Courier New', monospace;
+}
